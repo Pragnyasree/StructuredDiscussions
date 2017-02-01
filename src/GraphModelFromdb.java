@@ -61,28 +61,35 @@ public class GraphModelFromdb {
 		while (iterator.hasNext()) {
 			graph.addVertex(iterator.next());
 		}
-		
+			
 		while(rs2.next()){
-	         //Retrieve by column name
-	         String from  = rs2.getString("edge_from");
-	         Object from1 = from ;
-	         Vertex<String> v1  = (Vertex<String>) from1;
-	         String to  = rs2.getString("edge_to");
-	         Object to1 = to ;
-	         Vertex<String> v2  = (Vertex<String>) to1;
-	         int cost = rs.getInt("cost");
-	         //add information to each vertex object
-	         edgArrLst.add(new Edge(v1,v2,cost)); 
-	         graph.addEdge(v1, v2, cost);
-	      }
-	      
-	  //To display vertices information	
-	  System.out.print("The number of vertices in graph :");
-	  System.out.print(graph.verticessize());
-	  System.out.println("The vertices information is :");
-	  System.out.println(graph.getVerticies()) ;
+	        //Retrieve by column name
+			String from  = rs2.getString("edge_from");
+			String to  = rs2.getString("edge_to");	
+			int cost = rs2.getInt("cost");
+	        for (Vertex<String> temp : vertexArrLst )
+	         {
+	        	 String fromVertex = temp.name ;
+	        	 	        	 
+	        	 for(Vertex<String> temp2 : vertexArrLst)
+	        	 {
+	        		 String toVertex = temp2.name ;
+	        		 
+		 			 if ((fromVertex.equals(from)) && (toVertex.equals(to)))
+		 			  {
+		 			   edgArrLst.add(new Edge<String>(temp,temp2,cost)); 
+		 			   graph.addEdge(temp,temp2,cost);
+		 		     }
+		         }
+	         
+	      }	
+		}
+		
 	  System.out.println("The edges information is :");
 	  System.out.println(graph.getEdges()) ;
+	  
+	  System.out.println("The vertices information is :");
+	  System.out.println(graph.getVerticies()) ;
 	  
       //STEP 6: Clean-up environment
       rs.close();

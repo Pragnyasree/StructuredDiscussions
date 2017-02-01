@@ -95,5 +95,7 @@ public class GraphModel
 	  String claim4 = C4.toString();
 	  System.out.println(claim4);
 	  
+	  graph.breadthFirstSearch(S1, S1);
+	  
 	}
 }

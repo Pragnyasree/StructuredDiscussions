@@ -1,6 +1,7 @@
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -188,6 +189,61 @@ public class Graph<T> {
       }
     }
     return match;
+  }
+  
+  /**
+   * Perform a breadth first search of this graph, starting at v.
+   * 
+   * @param v -
+   *          the search starting point
+   * @param visitor -
+   *          the visitor whose visit method is called prior to visting a vertex.
+   */
+  public void breadthFirstSearch(Vertex<T> v, final Visitor<T> visitor) {
+    VisitorEX<T, RuntimeException> wrapper = new VisitorEX<T, RuntimeException>() {
+      public void visit(Graph<T> g, Vertex<T> v) throws RuntimeException {
+        if (visitor != null)
+          visitor.visit(g, v);
+      }
+    };
+    this.breadthFirstSearch(v, wrapper);
+  }
+  
+  /**
+   * Perform a breadth first search of this graph, starting at v. The vist may
+   * be cut short if visitor throws an exception during a vist callback.
+   * 
+   * @param <E>
+   * 
+   * @param v -
+   *          the search starting point
+   * @param visitor -
+   *          the visitor whose visit method is called prior to visiting a vertex.
+   * @throws E
+   *           if visitor.visit throws an exception
+   */
+  public <E extends Exception> void breadthFirstSearch(Vertex<T> v, VisitorEX<T, E> visitor)
+      throws E {
+    LinkedList<Vertex<T>> q = new LinkedList<Vertex<T>>();
+
+    q.add(v);
+    if (visitor != null)
+      visitor.visit(this, v);
+    v.visit();
+    while (q.isEmpty() == false) {
+      v = q.removeFirst();
+      System.out.println(v);
+      for (int i = 0; i < v.getOutgoingEdgeCount(); i++) {
+        Edge<T> e = v.getOutgoingEdge(i);
+        Vertex<T> to = e.getTo();
+        if (!to.visited()) {
+          q.add(to);
+          if (visitor != null)
+            visitor.visit(this, to);
+          to.visit();
+        }
+      }
+    }
   }
 
 }
