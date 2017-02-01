@@ -9,21 +9,19 @@ class Vertex<T> {
 
   private List<Edge<T>> outgoingEdges;
 
-  private boolean mark;
-
   public String name;
   
-  public String type;
+  private String type;
   
-  public T data;
+  private T data;
 
-  public T source;
+  private T source;
   
-  public T authority;
+  private T authority;
   
-  public T trust;
+  private T trust;
   
-  public T rating;
+  private T rating;
 
   /**
    * Calls this(null, null).
@@ -174,60 +172,7 @@ class Vertex<T> {
     return null;
   }
   
-  /**
-   * 
-   * @return the count of incoming edges
-   */
-  public int getOutgoingEdgeCount() {
-    return outgoingEdges.size();
-  }
-
-  /**
-   * Get the ith outgoing edge
-   * 
-   * @param i
-   *          the index into outgoing edges
-   * @return ith outgoing edge
-   */
-  public Edge<T> getOutgoingEdge(int i) {
-    return outgoingEdges.get(i);
-  }
-
-  /**
-   * Get the outgoing edges
-   * 
-   * @return outgoing edge list
-   */
-  public List<Edge<T>> getOutgoingEdges() {
-    return this.outgoingEdges;
-  }
-  
-  /**
-   * Set the vertex mark flag.
-   * 
-   */
-  public void mark() {
-    mark = true;
-  }
-
-  /**
-   * Has this vertex been marked during a visit
-   * 
-   * @return true is visit has been called
-   */
-  public boolean visited() {
-    return mark;
-  }
-
-  /**
-   * Visit the vertex and set the mark flag to true.
-   * 
-   */
-  public void visit() {
-    mark();
-  }
-
-  
+    
   /**
    * @return a string form of the vertex with in and out edges.
    */
