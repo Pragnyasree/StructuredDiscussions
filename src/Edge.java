@@ -8,6 +8,8 @@ class Edge<T> {
   private Vertex<T> to;
 
   private int cost;
+  
+  private String connection ;
 
   /**
    * Create a zero cost edge between from and to
@@ -18,7 +20,7 @@ class Edge<T> {
    *          the ending vertex
    */
   public Edge(Vertex<T> from, Vertex<T> to) {
-    this(from, to, 0);
+    this(from, to, 0 , "PRO");
   }
 
   /**
@@ -31,10 +33,11 @@ class Edge<T> {
    * @param cost
    *          the cost of the edge
    */
-  public Edge(Vertex<T> from, Vertex<T> to, int cost) {
+  public Edge(Vertex<T> from, Vertex<T> to, int cost , String connection) {
     this.from = from;
     this.to = to;
     this.cost = cost;
+    this.connection = connection;
   }
 
   /**
@@ -65,6 +68,16 @@ class Edge<T> {
   }
 
   /**
+   * Get the connection of the edge
+   * 
+   * @return connection of the edge
+   */
+  public String getConnection() {
+    return connection;
+  }
+
+  
+  /**
    * String rep of edge
    * 
    * @return string rep with from/to vertex names and cost
@@ -76,6 +89,8 @@ class Edge<T> {
     tmp.append(to.getName());
     tmp.append(", cost: ");
     tmp.append(cost);
+    tmp.append(", connection: ");
+    tmp.append(connection);
     tmp.append("]");
     return tmp.toString();
   }

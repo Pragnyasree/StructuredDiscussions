@@ -1,6 +1,8 @@
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -18,7 +20,8 @@ public class Graph<T> {
 
   /** The vertex identified as the root of the graph */
   private Vertex<T> rootVertex;
-
+  
+  
   /**
    * Construct a new graph without any vertices or edges
    */
@@ -104,11 +107,11 @@ public class Graph<T> {
   }
 
   /**
-   * Get the graph verticies
+   * Get the graph vertices
    * 
-   * @return the graph verticies
+   * @return the graph vertices
    */
-  public List<Vertex<T>> getVerticies() {
+  public List<Vertex<T>> getVertices() {
     return this.verticies;
   }
 
@@ -125,13 +128,13 @@ public class Graph<T> {
    * @throws IllegalArgumentException
    *           if from/to are not verticies in the graph
    */
-  public boolean addEdge(Vertex<T> from, Vertex<T> to, int cost) throws IllegalArgumentException {
+  public boolean addEdge(Vertex<T> from, Vertex<T> to, int cost,String connection) throws IllegalArgumentException {
     if (verticies.contains(from) == false)
       throw new IllegalArgumentException("from is not in graph");
     if (verticies.contains(to) == false)
       throw new IllegalArgumentException("to is not in graph");
 
-    Edge<T> e = new Edge<T>(from, to, cost);
+    Edge<T> e = new Edge<T>(from, to, cost,connection);
     if (from.findEdge(to) != null)
       return false;
     else {
@@ -179,7 +182,7 @@ public class Graph<T> {
    *          the comparator to perform the match
    * @return the first vertex with a matching rating, null if no matches are found
    */
-  public Vertex<T> findVertexByRating(T rating, Comparator<T> compare) {
+  public Vertex<T> findVertexByRating(String rating, Comparator<String> compare) {
     Vertex<T> match = null;
     for (Vertex<T> v : verticies) {
       if (compare.compare(rating, v.getRating()) == 0) {
@@ -190,6 +193,131 @@ public class Graph<T> {
     return match;
   }
   
+  /**
+   * Perform a depth first serach using recursion. 
+   * @param v -
+   *          the Vertex to start the search from
+   */
+  public void depthFirstSearch(Vertex<T> v){
+    v.visit();
+    System.out.println(v);
+    for (int i = 0; i < v.getOutgoingEdgeCount(); i++) {
+      Edge<T> e = v.getOutgoingEdge(i);
+      Vertex<T> to = e.getTo();
+      if (!to.visited())
+      {
+        depthFirstSearch(e.getTo());
+      }
+    }
+    clearMark();
+  }
+  
+  /**
+   * Perform a breadth first search 
+   * @param v -
+   *          the Vertex to start the search from
+   */
+  public void breadthFirstSearch(Vertex<T> v)
+  {
+    LinkedList<Vertex<T>> q = new LinkedList<Vertex<T>>();
+    q.add(v);
+    v.visit();	    
+    while (!q.isEmpty()) {
+      v = q.removeFirst(); 
+      System.out.println(v);
+      for (int i = 0; i < v.getOutgoingEdgeCount(); i++) {
+        Edge<T> e = v.getOutgoingEdge(i);
+        Vertex<T> to = e.getTo();
+        if (!to.visited()) {
+          q.add(to);
+          to.visit();
+        }
+      }
+    }
+    clearMark();
+  }  
+ 
+  /**
+   * Private method called by DFS,BFS to clear the marked
+   * vertices,so that it wont affect another call of
+   * traversal 
+   * 
+   */
+  private void clearMark() {
+	for (Vertex<T> v : verticies)
+		v.mark = false ;
+  }
+
+  /**
+   * Gives a subgraph
+   * @param graph -
+   *          the graph from which subgraph is to be obtained
+   * @param verticies -
+   *          the list of verticies in subgraph
+   * @return subgraph -
+   *          the resultant subgraph 
+   */
+  public Graph<T> Subgraph(Graph<T> graph, List<Vertex<T>> verticies) {
+	
+	    Graph<T> subgraph = new Graph<T>();
+	    
+	    ArrayList<Vertex<T>> subgraphverticies = new ArrayList<Vertex<T>>();
+	    
+	    Vertex<T> vertex_from = null,vertex_to=null ;
+	    
+	    //creating vertices with same attribute information as main graph
+	    for (Vertex<T> vertex : verticies) {
+	    	String id  = vertex.name;
+	         String type  = vertex.type;
+	         String data = vertex.data;
+	         String note  = vertex.note;
+	         String authority = vertex.authority;
+	         String trust = vertex.trust;
+	         String rating = vertex.rating;
+	         subgraphverticies.add(new Vertex<T>(id,type,data,note,authority,trust,rating));  
+	    }
+	    
+	    //adding vertices to subgraph
+	    Iterator<Vertex<T>>  iterator = subgraphverticies.iterator();
+		while (iterator.hasNext()) {
+			subgraph.addVertex(iterator.next());
+		}
+	    
+	 	for (Vertex<T> temp : verticies )
+        {
+	 	   //int i = 0,j = 0;
+	 	   for(Vertex<T> fromVertex : subgraphverticies)
+	 	    {
+	 	       if((temp.name).equals(fromVertex.name))
+	 	       {
+       	          vertex_from = fromVertex ;
+       	          //i = subgraphverticies.indexOf(fromVertex);
+	 	       }
+	 	    }	        	 
+       	   for(Vertex<T> temp2 : verticies)
+       	    {
+       		   for(Vertex<T> toVertex : subgraphverticies)
+	 	         {
+	 	            if((temp2.name).equals(toVertex.name))
+	 	              {
+	 	            	vertex_to = toVertex ;
+	 	            	//j = subgraphverticies.indexOf(toVertex);
+       	                  
+	 	              }
+	 	          }
+       		  
+	 			 if (graph.edges.contains(temp.findEdge(temp2)))
+	 			  {
+	 				 Edge<T> e = temp.findEdge(temp2);
+	 				 int cost = e.getCost();
+	 				 String connection = e.getConnection();
+	                 //subgraph.addEdge(subgraphverticies.get(i),subgraphverticies.get(j),0,"PRO");
+	 			     subgraph.addEdge(vertex_from,vertex_to,cost,connection);
+	 		      }
+	         }
+     }		
+	   return subgraph;
+   }
   
 }
 

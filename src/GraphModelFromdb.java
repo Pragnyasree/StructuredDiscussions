@@ -2,6 +2,7 @@
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class GraphModelFromdb {
    // JDBC driver name and database URL
@@ -19,10 +20,19 @@ public class GraphModelFromdb {
    static ArrayList<Vertex<String>> vertexArrLst = new ArrayList<Vertex<String>>();
    static ArrayList<Edge<String>> edgArrLst = new ArrayList<Edge<String>>();
    
+   //To create list of vertices to be included in subgraph
+   static List<Vertex<String>> subgraphverticies = new ArrayList<Vertex<String>>();
+   
+   static Graph<String> subgraph;
+   
    public static void main(String[] args) {
    Connection conn = null;
    Statement stmt = null;
    Statement stmt2 = null;
+   Statement stmt3 = null ;
+   Statement stmt4 = null ;
+   Statement stmt5 = null ;
+   
    
    try{
       //STEP 2: Register JDBC driver
@@ -36,11 +46,16 @@ public class GraphModelFromdb {
       System.out.println("Creating statement...");
       stmt = conn.createStatement();
       stmt2 = conn.createStatement();
-      String sql , sql2;
+      stmt3 = conn.createStatement();
+      stmt4 = conn.createStatement();
+      stmt5 = conn.createStatement();
+      String sql , sql2 ,sql3 , sql4, sql5;
       sql = "SELECT * FROM vertex";
       sql2 = "SELECT * FROM edge";
+      sql3 = "SELECT vertex_id FROM vertex where vertex_type = 'Stance' ";
       ResultSet rs = stmt.executeQuery(sql);
       ResultSet rs2 = stmt2.executeQuery(sql2);
+      ResultSet rs3 = stmt3.executeQuery(sql3);
 
       //STEP 5: Extract data from result set
       while(rs.next()){
@@ -48,12 +63,12 @@ public class GraphModelFromdb {
          String id  = rs.getString("vertex_id");
          String type  = rs.getString("vertex_type");
          String data = rs.getString("vertex_data");
-         String source  = rs.getString("vertex_source");
+         String note  = rs.getString("vertex_note");
          String authority = rs.getString("vertex_authority");
          String trust = rs.getString("vertex_trust");
          String rating = rs.getString("vertex_rating");
          //add information to each vertex object
-         vertexArrLst.add(new Vertex<String>(id,type,data,source,authority,trust,rating));   
+         vertexArrLst.add(new Vertex<String>(id,type,data,note,authority,trust,rating));   
       }
       
       //add each vertex to graph
@@ -61,12 +76,15 @@ public class GraphModelFromdb {
 		while (iterator.hasNext()) {
 			graph.addVertex(iterator.next());
 		}
+	
+	  rs.close();
 			
-		while(rs2.next()){
+	  while(rs2.next()){
 	        //Retrieve by column name
 			String from  = rs2.getString("edge_from");
 			String to  = rs2.getString("edge_to");	
 			int cost = rs2.getInt("cost");
+			String connection = rs2.getString("edge_connection");
 	        for (Vertex<String> temp : vertexArrLst )
 	         {
 	        	 String fromVertex = temp.name ;
@@ -77,24 +95,133 @@ public class GraphModelFromdb {
 	        		 
 		 			 if ((fromVertex.equals(from)) && (toVertex.equals(to)))
 		 			  {
-		 			   edgArrLst.add(new Edge<String>(temp,temp2,cost)); 
-		 			   graph.addEdge(temp,temp2,cost);
+		 			   edgArrLst.add(new Edge<String>(temp,temp2,cost,connection)); 
+		 			   graph.addEdge(temp,temp2,cost,connection);
 		 		     }
 		         }
 	         
 	      }	
 		}
-		
+		 
+	  
+	  rs2.close();   
+	
+	  //STEP 6: Performing tasks and displaying information
+	  System.out.println("The vertices information is :");
+	  System.out.println("The number of vertices is :"+graph.verticessize());
+	  System.out.println(graph.getVertices()) ;
+	  
+	  System.out.println("---------------------------------------------");
+	  
 	  System.out.println("The edges information is :");
+	  System.out.println("The number of vertices is :"+graph.edgessize());
 	  System.out.println(graph.getEdges()) ;
 	  
-	  System.out.println("The vertices information is :");
-	  System.out.println(graph.getVerticies()) ;
+	  System.out.println("---------------------------------------------");
 	  
-      //STEP 6: Clean-up environment
-      rs.close();
+	  while(rs3.next())
+	  {
+		  String stance  = rs3.getString("vertex_id");
+		  for (Vertex<String> temp : vertexArrLst )
+	         {
+			     
+	        	 if(stance.equals(temp.name))
+	        	 {
+	        		 System.out.println("Breadth first search of"+stance);
+	        		 graph.breadthFirstSearch(temp);
+	        		 System.out.println("---------------------------------------------");
+	        		 System.out.println("Depth first search of"+stance);
+	        		 graph.depthFirstSearch(temp);
+	        		 System.out.println("---------------------------------------------");
+	        	 }
+	         }
+	  }
+	  
+	  rs3.close();
+	  	  
+	  //To form subgraph for yes stance
+	  sql4 = "SELECT vertex_id FROM vertex where vertex_related_stance = 'Yes'" ;
+	  		 		
+	  ResultSet rs4 = stmt4.executeQuery(sql4);
+	  
+	  while(rs4.next())
+	  {
+		  String id = rs4.getString("vertex_id");
+		  for (Vertex<String> temp : vertexArrLst )
+	         {
+			     String vertex_name = temp.name ;
+	        	 if(vertex_name.equals(id))
+	        	 {
+	        		 subgraphverticies.add(temp);
+	        	 }
+	         }
+	  }
+	  
+	  subgraph = graph.Subgraph(graph, subgraphverticies);
+	  
+	  System.out.println("SUBGRAPH for Stance Yes");
+
+	  System.out.println("The number of vertices in graph is:" + subgraph.verticessize());
+	  System.out.println("The information about vertices");
+	  System.out.println(subgraph.getVertices());
+	  
+	  System.out.println("--------------------------");
+	  
+	  System.out.println("The number of edges in graph is:" + subgraph.edgessize());
+	  System.out.println("The information about edges");
+	  System.out.println(subgraph.getEdges());
+	  
+	  System.out.println("---------------------------------------------");
+	  
+	  rs4.close();
+	  
+	  //To form subgraph for No stance
+	  sql5 = "SELECT vertex_id FROM vertex where vertex_related_stance = 'No' ";
+	  ResultSet rs5 = stmt5.executeQuery(sql5);
+	  
+	  subgraphverticies.clear();
+	  
+	  while(rs5.next())
+	  {
+		  String id = rs5.getString("vertex_id");
+		  for (Vertex<String> temp : vertexArrLst )
+	         {
+			     String vertex_name = temp.name ;
+	        	 if(vertex_name.equals(id))
+	        	 {
+	        		 subgraphverticies.add(temp);
+	        	 }
+	         }
+	  }
+	  
+	  subgraph = graph.Subgraph(graph, subgraphverticies);
+	  
+	  System.out.println("SUBGRAPH for Stance No");
+
+	  System.out.println("The number of vertices in graph is:" + subgraph.verticessize());
+	  System.out.println("The information about vertices");
+	  System.out.println(subgraph.getVertices());
+	  
+	  System.out.println("--------------------------");
+	  
+	  System.out.println("The number of edges in graph is:" + subgraph.edgessize());
+	  System.out.println("The information about edges");
+	  System.out.println(subgraph.getEdges());
+	  
+	  System.out.println("---------------------------------------------");
+
+	  rs5.close();
+	  
+      //STEP 7: Clean-up environment
+	  
       stmt.close();
+      stmt2.close();
+      stmt3.close();
+      stmt4.close();
+      stmt5.close();
       conn.close();
+      
+      
    }catch(SQLException se){
       //Handle errors for JDBC
       se.printStackTrace();

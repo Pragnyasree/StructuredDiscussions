@@ -5,29 +5,31 @@ import java.util.ArrayList;
  * @param <T>
  */
 class Vertex<T> {
-  private List<Edge<T>> incomingEdges;
+  public List<Edge<T>> incomingEdges;
 
-  private List<Edge<T>> outgoingEdges;
+  public List<Edge<T>> outgoingEdges;
 
   public String name;
   
-  private String type;
+  protected String type;
   
-  private T data;
-
-  private T source;
+  protected String data;
   
-  private T authority;
+  protected String note;
   
-  private T trust;
+  protected String authority;
   
-  private T rating;
+  protected String trust;
+  
+  protected String rating;
+  
+  protected boolean mark;
 
   /**
    * Calls this(null, null).
    */
   public Vertex() {
-    this(null,null,null, null,null,null,null);
+    this(null,null,null,null,null,null,null);
   }
 
   /**
@@ -35,7 +37,7 @@ class Vertex<T> {
    * 
    * @param n
    */
-  public Vertex(String n,String t, T d) {
+  public Vertex(String n,String t, String d) {
     this(n, t,d,null,null,null,null);
   }
 
@@ -51,13 +53,12 @@ class Vertex<T> {
    * @param trust -
    *          trust associated with vertex        
    */
-  public Vertex(String n, String t,T data,T source, T authority, T trust, T rating) {
+  public Vertex(String n, String t,String data, String note,String authority, String trust, String rating) {
     incomingEdges = new ArrayList<Edge<T>>();
     outgoingEdges = new ArrayList<Edge<T>>();
     name = n;
     type = t;
     this.data = data;
-    this.source = source;
     this.authority = authority;
     this.trust = trust;
     this.rating = rating;
@@ -73,30 +74,14 @@ class Vertex<T> {
   /**
    * @return the data of the vertex
    */
-  public T getData() {
+  public String getData() {
     return this.data;
-  }
-
-  
-  /**
-   * @return the source of the vertex
-   */
-  public T getSource() {
-    return this.source;
-  }
-
-  /**
-   * @param source
-   *          The source to set.
-   */
-  public void setSource(T source) {
-    this.source = source;
   }
   
   /**
    * @return the authority of the vertex
    */
-  public T getAuthority() {
+  public String getAuthority() {
     return this.authority;
   }
 
@@ -104,14 +89,14 @@ class Vertex<T> {
    * @param authority
    *          The authority to set.
    */
-  public void setAuthority(T authority) {
+  public void setAuthority(String authority) {
     this.authority = authority;
   }
   
   /**
    * @return the trust of the vertex
    */
-  public T getTrust() {
+  public String getTrust() {
     return this.trust;
   }
 
@@ -119,14 +104,14 @@ class Vertex<T> {
    * @param trust
    *          The trust to set.
    */
-  public void setTrust(T trust) {
+  public void setTrust(String trust) {
     this.trust = trust;
   }
   
   /**
    * @return the rating of the vertex
    */
-  public T getRating() {
+  public String getRating() {
     return this.rating;
   }
 
@@ -134,7 +119,7 @@ class Vertex<T> {
    * @param rating
    *          The rating to set.
    */
-  public void setRating(T rating) {
+  public void setRating(String rating) {
     this.rating = rating;
   }
 
@@ -172,6 +157,59 @@ class Vertex<T> {
     return null;
   }
   
+  /**
+   * 
+   * @return the count of incoming edges
+   */
+  public int getOutgoingEdgeCount() {
+    return outgoingEdges.size();
+  }
+
+  /**
+   * Get the ith outgoing edge
+   * 
+   * @param i
+   *          the index into outgoing edges
+   * @return ith outgoing edge
+   */
+  public Edge<T> getOutgoingEdge(int i) {
+    return outgoingEdges.get(i);
+  }
+
+  /**
+   * Get the outgoing edges
+   * 
+   * @return outgoing edge list
+   */
+  public List<Edge<T>> getOutgoingEdges() {
+    return this.outgoingEdges;
+  }
+  
+  /**
+   * Set the vertex mark flag.
+   * 
+   */
+  public void mark() {
+    mark = true;
+  }
+
+  /**
+   * Has this vertex been marked during a visit
+   * 
+   * @return true is visit has been called
+   */
+  public boolean visited() {
+    return mark;
+  }
+
+  /**
+   * Visit the vertex and set the mark flag to true.
+   * 
+   */
+  public void visit() {
+    mark();
+  }
+  
     
   /**
    * @return a string form of the vertex with in and out edges.
@@ -183,8 +221,8 @@ class Vertex<T> {
     tmp.append(type);
     tmp.append(", data=");
     tmp.append(data);
-    tmp.append(", source=");
-    tmp.append(source);
+    tmp.append(", note=");
+    tmp.append(note);
     tmp.append(",authority=");
     tmp.append(authority);
     tmp.append(",trust=");
